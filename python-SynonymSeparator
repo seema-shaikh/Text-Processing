@@ -1,0 +1,59 @@
+import re
+import random
+import warnings
+class HTMLclass:
+    
+    VALID_EXTENSIONS = ('txt')
+    warnings.simplefilter('always', DeprecationWarning)
+    def _clean_html(spintax):
+        from bs4 import BeautifulSoup
+        soup = BeautifulSoup(spintax, 'html.parser')
+        cleanHTML =soup.get_text()
+        print "-------------------- REMOVED HTML TAGS-----------------------"
+        return cleanHTML
+    
+    def _convert_to_array(spintax):
+
+        convertedArray =[]
+        convertedArray=re.findall('\{(.*?)\}',spintax)
+        print "                                                             "
+        print "----------------extracted to array-------------------"
+        return convertedArray
+
+    import pandas as pd
+    def to_matrix(l, n):
+        return [l[i:i+n] for i in xrange(0, len(l), n)]
+
+    _parameter_spintax='''<h1>Mumbai</h1>{comprised|consisted of} {7| 7 different} islands. The University of Florida aspires to
+    {join|become listed on|participate} the ranks {of the|for the|of this} {nations|country's} top {|general} public
+    research universities. The {best|very best|most effective} universities are aided by careful {planning|preparation},
+    {a commitment|dedication|a consignment} to excellence by faculty, staff, {students|pupils}, alumni and donors, and
+    {a determination|a dedication} to {invest in|purchase|buy} areas that enhance quality.'''
+
+ 
+
+    cleanHTML=_clean_html(_parameter_spintax)
+    
+    l=_convert_to_array(_parameter_spintax)
+    print to_matrix(l,1)
+
+    
+    toMatrix={'teams':to_matrix(l,1)}
+    toMatrix_dataframe= pd.DataFrame(toMatrix)
+    print toMatrix_dataframe 
+
+    toMatrix_dataframe[['team1']] = pd.DataFrame(toMatrix_dataframe.teams.values.tolist(), index= toMatrix_dataframe.index)
+    print toMatrix_dataframe
+    df = pd.DataFrame(toMatrix_dataframe.team1.str.split('|',10).tolist())
+    print df
+
+    ''' --------------------USING MYSQL DATABASE-----------------------------'''
+    from sqlalchemy import create_engine
+    engine = create_engine('mysql://root:root@localhost:3306/db')
+    for index, row in df.iterrows():
+        df.columns = ['replaced_word', 'synonym1','synonym2']
+    df.to_sql(name='synonyms',con=engine,if_exists='append',index=False)
+    print "sucessfully entered SYNONYMS into database"
+
+
+
